@@ -5,7 +5,7 @@ import 'package:quiz_task/utils/common/colors.dart';
 Widget customBox({double? height, double? width}) =>
     SizedBox(height: height, width: width);
 
-Widget questionBox({required String quesIndex,required String question}) {
+Widget questionBox({required String quesIndex, required String question}) {
   return Container(
     padding: const EdgeInsets.all(12),
     margin: const EdgeInsets.symmetric(horizontal: 10),
@@ -29,12 +29,12 @@ Widget questionBox({required String quesIndex,required String question}) {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-         Text(
-          'Question $quesIndex',
+        Text(
+          quesIndex == 'Explanation' ? quesIndex : 'Question $quesIndex',
           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
         ),
         hMBox,
-         Text(
+        Text(
           question,
           style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
         ),
@@ -64,7 +64,7 @@ Widget quizBox({required Widget child}) {
         ),
       ],
     ),
-    child:child ,
+    child: child,
   );
 }
 

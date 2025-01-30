@@ -6,6 +6,7 @@ import 'package:quiz_task/controller/quiz_provider.dart';
 import 'package:quiz_task/model/quiz_model.dart';
 import 'package:quiz_task/utils/common/box.dart';
 import 'package:quiz_task/utils/common/colors.dart';
+import 'package:quiz_task/widgets/quiz_widgets.dart';
 import 'package:quiz_task/widgets/widgets.dart';
 
 class QuizPage extends StatelessWidget {
@@ -19,21 +20,11 @@ class QuizPage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              width: MediaQuery.of(context).size.width * .3,
-              decoration: BoxDecoration(
-                  color: kwhite, borderRadius: BorderRadius.circular(14)),
-              padding: const EdgeInsets.symmetric(vertical: 15),
-              child: Center(
-                  child: Text(
-                'Quiz Application UI',
-                style: TextStyle(color: kred, fontWeight: FontWeight.bold),
-              )),
-            ),
+            headingBox(context),
             customBox(height: 25),
             Consumer<QuizProvider>(builder: (context, quiz, child) {
               return Container(
-                width: MediaQuery.of(context).size.width * 0.7,
+                width: MediaQuery.sizeOf(context).width * 0.7,
                 padding:
                     const EdgeInsets.symmetric(horizontal: 60, vertical: 15),
                 decoration: BoxDecoration(
@@ -48,6 +39,7 @@ class QuizPage extends StatelessWidget {
                     ),
                     customBox(height: 20),
                     Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(
                           flex: 2,
@@ -55,83 +47,68 @@ class QuizPage extends StatelessWidget {
                             height: MediaQuery.sizeOf(context).height * 0.7,
                             child: PageView.builder(
                               itemCount: questions.length,
+                              controller: quiz.pageController,
                               onPageChanged: (index) {
                                 quiz.currentIndex = index;
                               },
                               itemBuilder: (context, index) {
+                                String crctAnswr = questions[index]['correct'];
+                                String? slctAnswr = quiz.userAnswers[index];
                                 return Column(
                                   children: [
                                     questionBox(
                                         quesIndex: '${index + 1}',
                                         question: questions[index]['question']),
                                     hMBox,
-                                    ...questions[index]['options']
-                                        .map<Widget>((option) {
-                                      bool isCorrect =
-                                          option == questions[index]['correct'];
-                                      bool isSelected =
-                                          quiz.userAnswers[index] == option;
-
-                                      return GestureDetector(
-                                        onTap: () {
-                                          log(option);
-                                          // quiz.selectAnswer(index, option);
-                                        },
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 8, vertical: 12),
-                                          margin: const EdgeInsets.symmetric(
-                                              horizontal: 10, vertical: 5),
-                                          width: double.infinity,
-                                          decoration: BoxDecoration(
-                                            color: kwhite,
-                                            border: Border.all(
-                                                color: isSelected
-                                                    ?(isCorrect ? Colors.green : Colors.red)
-                                                    : Colors.red),
-                                            borderRadius:
-                                                BorderRadius.circular(12),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: Colors.black
-                                                    .withOpacity(0.05),
-                                                offset: const Offset(0, 2),
-                                                blurRadius: 4,
-                                              ),
-                                              BoxShadow(
-                                                color: Colors.black
-                                                    .withOpacity(0.15),
-                                                offset: const Offset(0, 6),
-                                                blurRadius: 10,
-                                              ),
-                                            ],
+                                    ...questions[index]['options'].map<Widget>(
+                                      (option) {
+                                        bool isCorrect = option == crctAnswr;
+                                        bool isSelected = option == slctAnswr;
+                                        bool realAnser =
+                                            isCorrect && slctAnswr != null;
+                                        return GestureDetector(
+                                          onTap: quiz.userAnswers
+                                                  .containsKey(index)
+                                              ? null
+                                              : () {
+                                                  quiz.selectAnswer(
+                                                      index, option);
+                                                },
+                                          child: optionBox(
+                                            bgColor: isSelected
+                                                ? (isCorrect ? kgreen : kred)
+                                                : (realAnser ? kgreen : kwhite),
+                                            brColor: isSelected
+                                                ? (isCorrect ? kgreen : kred)
+                                                : (realAnser ? kgreen : kwhite),
+                                            option: option,
                                           ),
-                                          child: Text(option),
-                                        ),
-                                      );
-                                    }).toList(),
+                                        );
+                                      },
+                                    ).toList(),
+                                    hMBox,
                                     Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
                                       children: [
                                         quizButton(
                                           dir: 'Prev',
-                                          onPressed: () {
-                                            
-                                          },
+                                          onPressed: quiz.previousQuestion,
                                         ),
                                         wMBox,
                                         quizButton(
                                           dir: 'Next',
-                                          onPressed: () {},
+                                          onPressed: quiz.nextQuestion,
                                         )
                                       ],
                                     ),
                                     hMBox,
-                                    questionBox(
-                                        quesIndex: '1',
-                                        question:
-                                            'Lorem ipsum dolor sit amet, consectetur adipisci elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrum exercitationem '),
+                                    if (quiz.showExplanation &&
+                                        quiz.userAnswers.containsKey(index))
+                                      questionBox(
+                                          quesIndex: 'Explanation',
+                                          question: questions[index]
+                                              ['explanation']),
                                   ],
                                 );
                               },
@@ -141,34 +118,17 @@ class QuizPage extends StatelessWidget {
                         wBox,
                         Expanded(
                           flex: 1,
-                          child: Container(
-                            // decoration: const BoxDecoration(color: Colors.red),
-                            height: MediaQuery.sizeOf(context).height * 0.65,
-                            padding: const EdgeInsets.all(15),
-                            decoration: BoxDecoration(
-                              color: kwhite,
-                              borderRadius: BorderRadius.circular(12),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.05),
-                                  offset: const Offset(0, 2),
-                                  blurRadius: 4,
-                                ),
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.15),
-                                  offset: const Offset(0, 6),
-                                  blurRadius: 10,
-                                ),
-                              ],
-                            ),
+                          child: explanationBox(
+                            context: context,
                             child: Column(
                               children: [
-                                const Row(
+                                Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Text('Question 1/8'),
-                                    Text('Need Help ?'),
+                                    Text(
+                                        'Question ${quiz.currentIndex + 1}/10'),
+                                    const Text('Need Help ?'),
                                   ],
                                 ),
                                 GridView.builder(
@@ -183,14 +143,29 @@ class QuizPage extends StatelessWidget {
                                   ),
                                   padding:
                                       const EdgeInsets.symmetric(vertical: 25),
-                                  itemCount: 20,
-                                  itemBuilder: (context, index) => CircleAvatar(
-                                    child: Text(
-                                      ' ${index + 1}',
-                                      style: TextStyle(
-                                          fontSize: 12, color: kwhite),
-                                    ),
-                                  ),
+                                  itemCount: questions.length,
+                                  itemBuilder: (context, index) {
+                                    bool isAnswered =
+                                        quiz.userAnswers.containsKey(index);
+                                    bool isCorrect = questions[index]
+                                            ['correct'] ==
+                                        quiz.userAnswers[index];
+                                    return GestureDetector(
+                                      onTap: () {
+                                        quiz.changePage(index);
+                                        log(quiz.currentIndex.toString());
+                                      },
+                                      child: CircleAvatar(
+                                        backgroundColor: isAnswered
+                                            ? (isCorrect ? kgreen : kred)
+                                            : Colors.grey,
+                                        child: Text('${index + 1}',
+                                            style: const TextStyle(
+                                                fontSize: 12,
+                                                color: Colors.white)),
+                                      ),
+                                    );
+                                  },
                                 ),
                               ],
                             ),
