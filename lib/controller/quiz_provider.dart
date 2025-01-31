@@ -41,6 +41,7 @@ class QuizProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
   void changePage(int index) {
     currentIndex = index;
     pageController.jumpToPage(index);
@@ -58,5 +59,16 @@ class QuizProvider extends ChangeNotifier {
     userAnswers =
         Map<int, String>.from(box.get('userAnswers', defaultValue: {}));
     notifyListeners();
+  }
+
+  int getCorrectAnswersCount() {
+    int correctCount = 0;
+    for (int i = 0; i < questions.length; i++) {
+      if (userAnswers.containsKey(i) &&
+          userAnswers[i] == questions[i]['correct']) {
+        correctCount++;
+      }
+    }
+    return correctCount;
   }
 }

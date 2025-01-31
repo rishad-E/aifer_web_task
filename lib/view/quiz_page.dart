@@ -6,6 +6,7 @@ import 'package:quiz_task/controller/quiz_provider.dart';
 import 'package:quiz_task/model/quiz_model.dart';
 import 'package:quiz_task/utils/common/box.dart';
 import 'package:quiz_task/utils/common/colors.dart';
+import 'package:quiz_task/view/submit_page.dart';
 import 'package:quiz_task/widgets/quiz_widgets.dart';
 import 'package:quiz_task/widgets/widgets.dart';
 
@@ -172,6 +173,23 @@ class QuizPage extends StatelessWidget {
                           ),
                         ),
                       ],
+                    ),
+                    ElevatedButton(
+                      style: ButtonStyle(
+                          backgroundColor: WidgetStatePropertyAll(kwhite),
+                          visualDensity: VisualDensity.compact),
+                      onPressed: () {
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const SubmitPage()),
+                          (route) => false,
+                        );
+                      },
+                      child: Text(
+                        "Submit",
+                        style: TextStyle(color: kblack),
+                      ),
                     ),
                   ],
                 ),
